@@ -1,0 +1,6 @@
+/* This file is reserved for overriding and extending the template styles. */
+/* logo resizing */
+.logo{
+    object-fit: contain !important;
+    transform: scale(1.2) !important;
+}
