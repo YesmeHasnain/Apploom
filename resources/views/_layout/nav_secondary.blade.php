@@ -28,6 +28,13 @@
             </a>
             <ul>
                 <li>
+                    <a href="{{ route('ai.builder') }}">
+                    <i data-acorn-icon="chart-4" class="icon" data-acorn-size="18"></i>
+                    <span class="label">AI Builder</span>
+                    </a>
+                </li>
+
+                <li>
                     <a href="/Services/Database">
                         <i data-acorn-icon="database" class="icon d-none" data-acorn-size="18"></i>
                         <span class="label">Database</span>

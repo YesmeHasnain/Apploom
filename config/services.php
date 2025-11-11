@@ -44,6 +44,17 @@ return [
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
         'redirect' => env('FACEBOOK_REDIRECT_URL', 'http://127.0.0.1:8000/auth/callback/facebook'),
     ],
+    'genai' => [
+        'provider'       => env('AI_PROVIDER', 'google'),
+        'google_api_key' => env('GOOGLE_AI_API_KEY'),
+        'google_model'   => env('GOOGLE_AI_MODEL', 'gemini-1.5-flash'),
+    ],
+    'gemini' => [
+        'key'      => env('GOOGLE_GENAI_API_KEY'),
+        'model'    => env('GOOGLE_GENAI_MODEL', 'gemini-1.5-flash-latest'),
+        'endpoint' => env('GOOGLE_GENAI_ENDPOINT', 'https://generativelanguage.googleapis.com/v1beta'),
+    ],
+    
 
 
 ];

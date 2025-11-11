@@ -127,9 +127,10 @@
                     </div>
 
                     <div class="mb-3 filled w-100 d-flex flex-column">
-                        <i data-acorn-icon="tag"></i>
-                        <input class="form-control" name="username" placeholder="User Name" value="{{ old('username', $defaults['username']) }}" />
+                    <i data-acorn-icon="file-text"></i>
+                    <textarea class="form-control" name="description" rows="3" placeholder="Write a short bio/description...">{{ old('description', $defaults['description'] ?? $user->description) }}</textarea>
                     </div>
+
 
                     <div class="mb-3 filled w-100 d-flex flex-column">
                         <i data-acorn-icon="email"></i>

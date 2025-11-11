@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AccountSettingsController extends Controller
 {
@@ -13,20 +14,20 @@ class AccountSettingsController extends Controller
     {
         $user = Auth::user();
 
-        // defaults to keep page happy if null
         $defaults = [
-            'username'          => $user->username ?? '',
-            'phone'             => $user->phone ?? '',
-            'gender'            => $user->gender ?? null,
-            'language'          => $user->language ?? 'English',
-            'notify_security'   => (bool)($user->notify_security ?? true),
-            'notify_budget'     => (bool)($user->notify_budget ?? true),
-            'notify_quota'      => (bool)($user->notify_quota ?? true),
-            'notify_general'    => (bool)($user->notify_general ?? true),
-            'notify_newsletter' => (bool)($user->notify_newsletter ?? false),
+            // username remove, description add
+            'description'       => $user->description,
+            'phone'             => $user->phone,
+            'gender'            => $user->gender,
+            'language'          => $user->language,
+            'notify_security'   => (bool) $user->notify_security,
+            'notify_budget'     => (bool) $user->notify_budget,
+            'notify_quota'      => (bool) $user->notify_quota,
+            'notify_general'    => (bool) $user->notify_general,
+            'notify_newsletter' => (bool) $user->notify_newsletter,
         ];
 
-        return view('account.settings', compact('user', 'defaults'));
+        return view('account.settings', compact('user','defaults'));
     }
 
     public function update(Request $request)
@@ -34,31 +35,43 @@ class AccountSettingsController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'username' => ['nullable', 'string', 'max:255', Rule::unique('users','username')->ignore($user->id)],
-            'phone'    => ['nullable', 'string', 'max:50'],
-            'gender'   => ['nullable', Rule::in(['Male','Female','Other'])],
-            'language' => ['nullable', Rule::in(['English','Spanish'])],
-            'avatar'   => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'name'        => ['required','string','max:255'],
+            // username rule removed
+            'description' => ['nullable','string','max:500'],
+            'phone'       => ['nullable','string','max:50'],
+            'gender'      => ['nullable', Rule::in(['Male','Female','Other'])],
+            'language'    => ['nullable', Rule::in(['English','Spanish'])],
+            'avatar'      => ['nullable','file','mimetypes:image/jpeg,image/png,image/webp,image/gif','max:5120'],
         ]);
 
-        // handle avatar upload (optional)
+        // Avatar
         if ($request->hasFile('avatar')) {
-            // delete old if stored by us
-            if ($user->avatar && str_starts_with($user->avatar, 'avatars/')) {
-                Storage::disk('public')->delete($user->avatar);
+            $file = $request->file('avatar');
+            if (! $file->isValid()) {
+                return back()->withErrors(['avatar' => 'The selected image is invalid. Please try another file.']);
             }
-            $path = $request->file('avatar')->store('avatars', 'public'); // storage/app/public/avatars/...
-            $user->avatar = $path;
+            try {
+                if ($user->avatar && Str::startsWith($user->avatar, 'avatars/')) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+                $path = $file->store('avatars', 'public');
+                if (! $path) {
+                    return back()->withErrors(['avatar' => 'The avatar failed to upload.']);
+                }
+                $user->avatar = $path;
+            } catch (\Throwable $e) {
+                return back()->withErrors(['avatar' => 'The avatar failed to upload. '.$e->getMessage()]);
+            }
         }
 
-        $user->name     = $request->input('name');
-        $user->username = $request->input('username');
-        $user->phone    = $request->input('phone');
-        $user->gender   = $request->input('gender');
-        $user->language = $request->input('language');
+        // Fields
+        $user->name        = $request->input('name');
+        $user->description = $request->input('description'); // <-- NEW
+        $user->phone       = $request->input('phone');
+        $user->gender      = $request->input('gender');
+        $user->language    = $request->input('language');
 
-        // toggles (checkboxes)
+        // Toggles
         $user->notify_security   = $request->boolean('notify_security');
         $user->notify_budget     = $request->boolean('notify_budget');
         $user->notify_quota      = $request->boolean('notify_quota');

@@ -19,7 +19,7 @@ class User extends Authenticatable
         'email',
         'password',
         'avatar',
-        'username',
+        'description',
         'provider',
         'provider_id',
         'provider_token',
@@ -49,7 +49,7 @@ class User extends Authenticatable
 
 
     // for image update
-    public function getAvatarUrlAttribute(): string
+ public function getAvatarUrlAttribute(): string
 {
     $raw = $this->avatar;
     if (! $raw) return '/img/profile/profile-9.webp';
